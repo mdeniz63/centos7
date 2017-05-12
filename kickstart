@@ -1,3 +1,4 @@
+#!/bin/bash
 ----  KICKSTART CENTOS 7 DVD INSTALLATION ---- 
 mkdir -p /CentOS7
 mount -t iso9660 -o loop CentOS-7-x86_64-DVD-1503-01.iso /CentOS7
