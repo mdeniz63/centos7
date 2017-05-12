@@ -1,0 +1,76 @@
+----  KICKSTART CENTOS 7 DVD INSTALLATION ---- 
+mkdir -p /CentOS7
+mount -t iso9660 -o loop CentOS-7-x86_64-DVD-1503-01.iso /CentOS7
+mount -t iso9660 -o loop CentOS-7-x86_64-DVD-1511.iso /CentOS7
+mkdir -p /iso/ks/
+cd /iso/
+
+---- COPY CONTENT ----
+rsync -av /CentOS7/ /iso/
+find /iso/ -name TRANS.TBL -exec rm -f {} \; -print
+yum install anaconda anaconda-help anaconda-runtime
+
+--- ADD CUSTOM PACKAGES AND FILES  ----
+cp /APP/nitro.tar /iso/
+cp /APP/ks.cfg /iso/ks/
+cp -f /APP/isolinux.cfg /iso/isolinux/
+cp /APP/rpm/* /iso/Packages/
+chmod 664 /iso/isolinux/isolinux.bin
+chmod 664 /iso/isolinux/isolinux.*
+chmod 664 /iso/ks/
+chmod 664 /iso/ks/ks.cfg
+
+---- CREATE REPOSITORY  ----
+cd /iso/
+discinfo=`head -1 .discinfo`
+compdata=`find repodata -name *comps*xml`
+createrepo  -g $compdata .
+
+---- MAKE ISO ----
+
+cd /iso/
+ISOFILE="EC.iso";
+PACKAGER="EC";
+ISONAME="EC";
+ISODATE="2016/07/07";
+mkisofs -r -R -J -T -v -no-emul-boot -boot-load-size 4 -boot-info-table -V "$ISONAME" -p "$PACKAGER" -A "$ISONAME - $ISODATE" -b isolinux/isolinux.bin -c isolinux/boot.cat -x "lost+found" --joliet-long -o $ISOFILE .
+	
+---- MD5 CHECKSUM  ----
+implantisomd5 EC.iso
+
+-- WRITE TO USB
+dd if=EC.iso of=/dev/sdc
+b7491a60-2cc6-46e7-8ae0-047520ac27f0
+
+--- FORMAT BOOTABLE USB ---
+#	Find USB Device Path
+fdisk -l
+
+# 	Create Two Partitions
+ 
+sudo fdisk /dev/sdX
+n (create partition, accept defaults for type, number, and first sector)
++250M (defined size as 250MB)
+t
+c (change type to W95 FAT32 (LBA) - other FAT types may work, but I have not tried)
+a (make bootable)
+n (create partition, accept defaults for type, number, first sector, and size)
+w (write changes to device)
+
+# 	Format partitons
+mkfs -t vfat -n "BOOT" /dev/sdc1
+mkfs -L "DATA" /dev/sdc2
+
+#	Write MBR data to device
+yum install syslinux
+dd conv=notrunc bs=440 count=1 if=/usr/share/syslinux/mbr.bin of=/dev/sdb
+
+#	Install syslinux to first parition
+syslinux /dev/sdb1
+
+#	Mount the partitions
+mkdir -p /BOOT && mount /dev/sdc1 BOOT
+mkdir -p /DATA && mount /dev/sdc2 DATA
+mkdir -p /DVD && mount /CentOS-7-x86_64-DVD-1511.iso DVD
+cp /DVD/isolinux/* /BOOT
+mv /BOOT/isolinux.cfg /BOOT/syslinux.cfg
