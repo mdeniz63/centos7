@@ -1,11 +1,14 @@
 #!/bin/bash
---- FORMAT BOOTABLE USB ---
+#	FORMAT BOOTABLE USB
+
+#	Run as root user
 #	Find USB Device Path
+
 fdisk -l
 
 # 	Create Two Partitions
- 
-sudo fdisk /dev/sdX
+fdisk /dev/sdX
+
 n (create partition, accept defaults for type, number, and first sector)
 +250M (defined size as 250MB)
 t
