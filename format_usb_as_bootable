@@ -1,0 +1,33 @@
+#!/bin/bash
+--- FORMAT BOOTABLE USB ---
+#	Find USB Device Path
+fdisk -l
+
+# 	Create Two Partitions
+ 
+sudo fdisk /dev/sdX
+n (create partition, accept defaults for type, number, and first sector)
++250M (defined size as 250MB)
+t
+c (change type to W95 FAT32 (LBA) - other FAT types may work, but I have not tried)
+a (make bootable)
+n (create partition, accept defaults for type, number, first sector, and size)
+w (write changes to device)
+
+# 	Format partitons
+mkfs -t vfat -n "BOOT" /dev/sdc1
+mkfs -L "DATA" /dev/sdc2
+
+#	Write MBR data to device
+yum install syslinux
+dd conv=notrunc bs=440 count=1 if=/usr/share/syslinux/mbr.bin of=/dev/sdb
+
+#	Install syslinux to first parition
+syslinux /dev/sdb1
+
+#	Mount the partitions
+mkdir -p /BOOT && mount /dev/sdc1 BOOT
+mkdir -p /DATA && mount /dev/sdc2 DATA
+mkdir -p /DVD && mount /CentOS-7-x86_64-DVD-1511.iso DVD
+cp /DVD/isolinux/* /BOOT
+mv /BOOT/isolinux.cfg /BOOT/syslinux.cfg
