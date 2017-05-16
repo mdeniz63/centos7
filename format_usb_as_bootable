@@ -38,3 +38,4 @@ mkdir -p /DATA && mount /dev/sdb2 DATA
 mkdir -p /DVD && mount /CentOS-7-x86_64-Minimal-1611.iso DVD
 cp /DVD/isolinux/* /BOOT
 mv /BOOT/isolinux.cfg /BOOT/syslinux.cfg
+cp /CentOS-7-x86_64-Minimal-1611.iso /DATA
