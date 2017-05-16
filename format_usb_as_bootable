@@ -3,8 +3,11 @@
 
 #	Run as root user
 #	Find USB Device Path
-
 fdisk -l
+
+usb=/dev/sdb
+part1=/dev/sdb1
+part2=/dev/sdb2
 
 # 	Create Two Partitions
 fdisk /dev/sdX
@@ -18,8 +21,8 @@ n (create partition, accept defaults for type, number, first sector, and size)
 w (write changes to device)
 
 # 	Format partitons
-mkfs -t vfat -n "BOOT" /dev/sdc1
-mkfs -L "DATA" /dev/sdc2
+mkfs -t vfat -n "BOOT" /dev/sdb1
+mkfs -L "DATA" /dev/sdb2
 
 #	Write MBR data to device
 yum install syslinux
@@ -29,8 +32,8 @@ dd conv=notrunc bs=440 count=1 if=/usr/share/syslinux/mbr.bin of=/dev/sdb
 syslinux /dev/sdb1
 
 #	Mount the partitions
-mkdir -p /BOOT && mount /dev/sdc1 BOOT
-mkdir -p /DATA && mount /dev/sdc2 DATA
+mkdir -p /BOOT && mount /dev/sdb1 BOOT
+mkdir -p /DATA && mount /dev/sdb2 DATA
 mkdir -p /DVD && mount /CentOS-7-x86_64-DVD-1511.iso DVD
 cp /DVD/isolinux/* /BOOT
 mv /BOOT/isolinux.cfg /BOOT/syslinux.cfg
