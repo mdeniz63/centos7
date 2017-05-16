@@ -5,6 +5,7 @@
 #	Find USB Device Path
 fdisk -l
 
+iso=CentOS-7-x86_64-Minimal-1611.iso
 usb=/dev/sdb
 part1=/dev/sdb1
 part2=/dev/sdb2
@@ -34,6 +35,6 @@ syslinux /dev/sdb1
 #	Mount the partitions
 mkdir -p /BOOT && mount /dev/sdb1 BOOT
 mkdir -p /DATA && mount /dev/sdb2 DATA
-mkdir -p /DVD && mount /CentOS-7-x86_64-DVD-1511.iso DVD
+mkdir -p /DVD && mount /CentOS-7-x86_64-Minimal-1611.iso DVD
 cp /DVD/isolinux/* /BOOT
 mv /BOOT/isolinux.cfg /BOOT/syslinux.cfg
